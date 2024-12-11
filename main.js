@@ -3,8 +3,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildVoiceStates,
   ],
@@ -25,10 +25,10 @@ const slashcommandsPath = path.join(__dirname, 'commands');
 const slashcommandFiles = fs.readdirSync(slashcommandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of slashcommandFiles) {
-	const slashfilePath = path.join(slashcommandsPath, file);
-	const command = require(slashfilePath);
+    const slashfilePath = path.join(slashcommandsPath, file);
+    const command = require(slashfilePath);
   console.log(`-> [Loaded Command] ${file.split('.')[0]}`);
-	client.commands.set(command.data.name, command);
+    client.commands.set(command.data.name, command);
 }
 
 //イベントコマンド
@@ -36,32 +36,38 @@ const eventsPath = path.join(__dirname, 'events');
 const eventsFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
 for (const file of eventsFiles) {
-	const eventfilePath = path.join(eventsPath, file);
-	const event = require(eventfilePath);
+    const eventfilePath = path.join(eventsPath, file);
+    const event = require(eventfilePath);
   if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
+        client.once(event.name, (...args) => event.execute(...args));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args));
+    }
   console.log(`-> [Loaded Event] ${file.split('.')[0]}`);
 }
 
 client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
+    if (!interaction.isChatInputCommand()) return;
 
-	const command = interaction.client.commands.get(interaction.commandName);
+    const command = interaction.client.commands.get(interaction.commandName);
 
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
+    if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+    }
 
-	try {
-		await command.execute(client,interaction);
-	} catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'コマンドがありません', ephemeral: true });
-	}
+    try {
+        await command.execute(client,interaction);
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({ content: 'コマンドがありません', ephemeral: true });
+    }
+});
+
+client.on(Events.MessageCreate, message => {
+  if (message.content === 'ね/entyou') {
+    message.reply('園長大好き');
+  }
 });
 
 client.login(process.env.TOKEN);
